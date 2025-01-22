@@ -1,0 +1,38 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #FAEBD7; /* Light pink */
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    margin: 20px 0;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+
+.box {
+    background-color: #F5F5DC; /* White */
+    border: 1px solid #e3d6da; /* Light pink border */
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    flex: 1 0 calc(30% - 20px);
+    margin: 0 10px 20px;
+    height: 260px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #333;
+    margin-top: 0;
+}

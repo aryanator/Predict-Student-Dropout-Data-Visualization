@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examining patterns in student drop out rate to improve education system</title>
+    <!-- Google fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+
+    <!-- D3.js -->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+
+
+    <style>
+
+body {
+    font-family: "Times New Roman", Times, serif;
+    background-color: #000000; /* Black background */
+    color: #fff; /* White text */
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    margin: 0;
+    background-color: #444; /* Dark gray container background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Dark shadow */
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+.column {
+    
+    flex : 1;
+    margin-left: 0%;
+    margin-right: 10px;
+}
+/* Common styles for all boxes */
+.box1,
+.box2,
+.box3,
+.box4,
+.radarChart {
+    background-color: #555; /* Dark gray box background */
+    border: 1px solid #777; /* Gray border */
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    
+    margin: 0 10px 20px;
+    color: #fff; /* White text */
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* Specific styles for Box 1 */
+.box1 {
+    width: 500px; /* Set width to one-third of container minus margins */
+    height: 250px;
+    padding: 20px;
+}
+
+/* Specific styles for Box 2 */
+.box2 {
+    width: 450px; /* Set width to one-third of container minus margins */
+    height: 250px;
+    padding: 20px;
+    margin-left: 20px;
+}
+
+/* Specific styles for Box 3 */
+.box3 {
+    width:505px;
+    height: 600px;
+    padding: 20px;
+    margin-left: -10px; /* Set width to one-third of container minus margins */
+    padding-top: 20px;
+}
+
+/* Specific styles for Box 4 */
+.box4 {
+    width: 500px; /* Set width to a fixed value */
+    height: 300px;
+    padding: 20px;
+    
+}
+
+/* Specific styles for Radar Chart */
+.radarChart {
+    width: 450px; /* Set width to a fixed value */
+    height: 300px;
+    padding: 20px;
+    margin-left: 20px;
+}
+
+/* Hover effect */
+.box1,
+.box2,
+.box3,
+.box4 {
+    transition: box-shadow 0.3s ease, transform 0.3s ease, z-index 0.3s ease; /* Add transition for box-shadow, transform, and z-index */
+}
+
+.box1:hover,
+.box2:hover,
+.box3:hover,
+.box4:hover {
+    box-shadow: 0 4px 8px rgba(0, 255, 0, 0.5); /* Green shadow on hover */
+    transform: translateY(-5px); /* Move the box slightly upwards on hover */
+    z-index: 1; /* Increase z-index on hover */
+}
+
+
+/* Text styles */
+.box1 p,
+.box2 p,
+.box3 p,
+.box4 p,
+.radarChart p {
+    font-size: 14px; /* Increase font size for better readability */
+}
+
+.box1 h2,
+.box2 h2,
+.box3 h2,
+.box4 h2,
+.radarChart h2 {
+    font-size: 20px; /* Increase font size for better readability */
+    color: #fff; /* White */
+}
+
+.tooltip-box {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #cccccc;
+    padding: 5px;
+    position: absolute;
+    display: none;
+    pointer-events: none;
+}
+
+/* Header styles */
+/* Styling for h1 */
+/* Styling for h1 */
+h1 {
+    text-align: center;
+    margin: 0;
+    margin-bottom: 0;
+    background: linear-gradient(to right, #4caf50, #8bc34a); /* Gradient background */
+    color: #000000; /* White text */
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: "Times New Roman", Times, serif;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for background and text color */
+}
+
+/* Hover effect for h1 */
+h1:hover {
+    background-color: #388e3c; /* Darker green background on hover */
+    color: #ffffff; /* White text color on hover */
+}
+
+
+
+h2 {
+    text-align: center;
+    color: #333; /* Dark grey */
+    margin-top: 0;
+}
+
+
+.legend {
+            font-family: 'Raleway', sans-serif;
+            fill: #333333;
+        }
+
+        .tooltip {
+            fill: #333333;
+        }
+
+        .radarArea {
+            transition: fill-opacity 0.4s ease-out;
+        }
+
+        .radarArea:hover {
+            fill-opacity: 0.9;
+        }
+
+        .radarStroke {
+            transition: stroke-width 0.4s ease-out;
+        }
+
+        .radarStroke:hover {
+            stroke-width: 4px;
+        }
+
+        .tooltip-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ccc;
+            padding: 5px;
+            position: absolute;
+            display: none;
+            pointer-events: none;
+        }
+
+        .bar {
+            fill: steelblue;
+        }
+
+        .brush rect.selection {
+            fill: #ddd;
+            fill-opacity: 0.3;
+        }
+        .counts {
+    background-color: rgba(255, 255, 255, 0.8); /* Change background color to white with transparency */
+    border: 1px solid #ccc;
+    padding: 3px;
+    font-size: 10px;
+    position: absolute;
+    top: 80px;
+    right: 980px;
+    z-index: 1; /* Ensure the counts box appears above other elements */
+}
+
+/* Add a class for the selected region */
+.selected-region {
+    fill: blue; /* Change the color of the selected region to blue */
+    fill-opacity: 0.3; /* Set the transparency of the selected region */
+}
+
+/* Label styling */
+/* Label styling */
+label {
+    color: #00ff00; /* Green text */
+    font-size: 16px;
+    margin-right: 10px;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+/* Select container */
+.select-container {
+    position: relative;
+}
+
+/* Select styling */
+select {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: 2px solid #00ff00; /* Green border */
+    background-color: #333; /* Black background */
+    color: #fff; /* White text */
+    font-size: 14px;
+    appearance: none; /* Remove default arrow icon */
+    cursor: pointer;
+    width: 150px; /* Adjust width as needed */
+}
+
+/* Styling for select options */
+select option {
+    background-color: #00ff00; /* Dark green background */
+    color: #000000; /* Green text */
+    font-size: 14px;
+}
+
+/* Select arrow icon */
+.select-arrow {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    pointer-events: none; /* Ensure the arrow doesn't block select interaction */
+}
+
+/* Select arrow styling */
+.select-arrow::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px 5px 0 5px;
+    border-color: #fff transparent transparent transparent;
+}
+
+
+
+
+
+        
+    </style>
+</head>
+<body>
+    <h1>Examining patterns in student drop out rate to improve education system</h1>
+    <div class="container">
+        <div class = "row">
+        <div class="column">
+            <div class="box1" id="chart">
+                <h2>Scatter Plot</h2>
+                <label for="xColumn">X-Axis:</label>
+    <select id="xColumn">
+        <!-- Options will be dynamically added here -->
+    </select>
+
+    <label for="yColumn">Y-Axis:</label>
+    <select id="yColumn">
+        <!-- Options will be dynamically added here -->
+    </select>
+            </div>
+            
+            
+            
+            <div class="box4">
+                <svg id="featuresPlot" width="500" height="250"></svg>
+            </div>
+        </div>
+        <br>
+        <div class="column">
+
+            <div class = "column">
+                <div class="box2" id="chart-container">
+                </div>
+
+            <div class="radarChart">
+                <div class="tooltip-box" id="tooltipBox"></div>
+            </div>
+        </div>
+        </div>
+            <br>
+            <div class = "column">
+                <div id="chord" class="box3">
+                    <h2>Chord Diagram to display flow of information</h2>
+                </div>  
+        </div>  
+            
+            
+<!--          <div class="box">
+                <h2>Box 6</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eget felis quis urna faucibus lacinia.</p>
+            </div> -->
+            <script>
+                
+//############################################################################################################################
+//############################################################################################################################
+//######################################################Pie Chart#############################################################
+//############################################################################################################################
+//############################################################################################################################               
+function createInteractivePieChart(data) {
+    // Select the SVG container
+    const svgContainer = d3.select("#chart-container");
+
+    // Clear the SVG content
+    svgContainer.selectAll("*").remove();
+
+    const width = 450;
+    const height = 250;
+    const radius = Math.min(width, height) / 2;
+
+    const svg = svgContainer
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width / 2}, ${height / 2 +10})`);
+    
+    
+    svg.append("text")
+        .attr("x", width / 2 -225)
+        .attr("y", 50 / 2 - 140)
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+        .style("fill", "White")
+        .style("font-family","Times New Roman, Times, serif")
+        .style("font-weight", "bold") 
+        .style("padding-bottom", "20px")
+        .text("Pie Chart to show the distribution of dropouts");
+    const color = d3.scaleOrdinal()
+        .domain(Object.keys(data))
+        .range(["#FFD700", "#FF6347", "#4169E1", "#00FF00", "#FFA07A", "#00CED1", "#FFD700", "#FF4500", "#8A2BE2", "#ADFF2F", "#FF69B4", "#32CD32", "#1E90FF", "#FFD700", "#8B4513", "#FF1493", "#20B2AA", "#FF8C00", "#4682B4", "#6A5ACD"]); // Add more colors as needed
+
+    const arc = d3.arc()
+        .innerRadius(radius * 0.25)
+        .outerRadius(radius *0.9);
+
+    const pie = d3.pie()
+        .value(d => (typeof d === "object" ? d.Dropout + d.Graduate + d.Enrolled : d))
+        .sort(null);
+
+    const arcs = svg.selectAll("arc")
+        .data(pie(Object.values(data)))
+        .enter()
+        .append("g")
+        .attr("class", "arc");
+
+    arcs.append("path")
+        .attr("d", arc)
+        .attr("fill", (d, i) => color(i))
+        .style("opacity", 0)
+        .transition()
+        .duration(1000)
+        .style("opacity", 1)
+        .attrTween("d", arcTween);
+
+    arcs.append("text")
+        .attr("transform", d => {
+            const [x, y] = arc.centroid(d);
+            const angle = (d.startAngle + d.endAngle) / 2;
+            return `translate(${x}, ${y}) rotate(${angle * (180 / Math.PI) - 90})`;
+        })
+        .attr("text-anchor", "middle")
+        .text(d => Object.keys(data)[d.index])
+        .style("fill", (d, i) => getTextColor(color(i))) // Use function to get contrasting text color
+        .style("font-size", "10px") // Reduced font size for better readability
+        .style("font-weight", "bold")
+        .style("pointer-events", "none");
+
+    arcs.on("click", function(event, d) {
+        if (typeof d.data === "object") {
+            const subData = [
+                { label: "Dropout", value: d.data.Dropout },
+                { label: "Enrolled", value: d.data.Enrolled },
+                { label: "Graduate", value: d.data.Graduate }
+            ];
+
+            const subPie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+
+            const subPieData = subPie(subData);
+
+            arcs.selectAll("path").remove();
+            arcs.selectAll("text").remove();
+
+            arcs.selectAll("path")
+                .data(subPieData)
+                .enter()
+                .append("path")
+                .attr("d", arc)
+                .attr("fill", (subD, i) => color(i))
+                .style("opacity", 0)
+                .transition()
+                .duration(1000)
+                .style("opacity", 1)
+                .attrTween("d", arcTween);
+
+            arcs.selectAll("text")
+                .data(subPieData)
+                .enter()
+                .append("text")
+                .attr("transform", d => `translate(${arc.centroid(d)})`)
+                .attr("text-anchor", "middle")
+                .text(d => d.data.label)
+                .style("fill", (d, i) => getTextColor(color(i))) // Use function to get contrasting text color
+                .style("font-size", "10px") // Reduced font size for better readability
+                .style("font-weight", "bold")
+                .style("pointer-events", "none");
+
+            // Add a button to go back to the previous chart
+            svg.append("rect")
+                .attr("x", -150)
+                .attr("y", height/2 -30)
+                .attr("width", 34)
+                .attr("height", 25)
+                .style("fill", "black")
+                .style("cursor", "pointer")
+                .on("click", function() {
+                    // Call the function with the original data
+                    createInteractivePieChart(data);
+                });
+
+            svg.append("text")
+                .attr("x", -135)
+                .attr("y", height / 2 -20)
+                .attr("text-anchor", "middle")
+                .attr("fill", "white")
+                .style("font-size", "15px") // Reduced font size for better readability
+                .style("pointer-events", "none")
+                .text("Back");
+
+                
+        }
+    });
+
+    function arcTween(a) {
+        const i = d3.interpolate(this._current, a);
+        this._current = i(0);
+        return function(t) {
+            return arc(i(t));
+        };
+    }
+
+    // Function to get contrasting text color based on background color
+    function getTextColor(bgColor) {
+        const threshold = 150; // Adjust the threshold as needed
+        const color = d3.lab(bgColor).l < threshold ? "#ffffff" : "#000000";
+        return color;
+    }
+}
+
+        fetch('/piechart_data')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Received data from backend:", data);
+                globalData_pie = data;
+                const firstElement = Object.values(data)[0];
+                console.log("First element of the dictionary:", firstElement);
+                console.log(globalData_pie);
+                createInteractivePieChart(firstElement);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
+
+            
+                
+//############################################################################################################################
+//############################################################################################################################
+//######################################################Radar Plot############################################################
+//############################################################################################################################
+//############################################################################################################################
+let correlationDistances;
+
+var margin = {top: 60, right: 5, bottom: 30, left: 35},
+        width = Math.min(420, window.innerWidth - 10) - margin.left - margin.right,
+        height = Math.min(210, window.innerHeight - margin.top - margin.bottom - 20);
+        var color = d3.scaleOrdinal()
+    .range(["#2E8B57", "#4682B4", "#8A2BE2", "#FF7F50", "#6495ED", "#DC143C", "#00FFFF"]);
+
+
+    var radarChartOptions = {
+        w: width,
+        h: height,
+        margin: margin,
+        maxValue: 0.5,
+        levels: 5,
+        roundStrokes: true,
+        color: color
+    };
+
+    function RadarChart(id, data, columnNames, options) {
+        console.log("RadarChart data", data);
+        console.log("RadarChart columnNames", columnNames);
+        var cfg = {
+            w: 600,
+            h: 300,
+            margin: {top: 20, right: 20, bottom: 20, left: 20},
+            levels: 3,
+            maxValue: 0,
+            labelFactor: 1.25,
+            wrapWidth: 60,
+            opacityArea: 0.5,
+            dotRadius: 4,
+            opacityCircles: 0.05,
+            strokeWidth: 2,
+            roundStrokes: false,
+            color: d3.scaleOrdinal()
+        };
+
+        if ('undefined' !== typeof options) {
+            for (var i in options) {
+                if ('undefined' !== typeof options[i]) {
+                    cfg[i] = options[i];
+                }
+            }
+        }
+
+        var maxValue = Math.max(cfg.maxValue, d3.max(data, function (i) {
+            return d3.max(i.map(function (o) {
+                return o.value;
+            }))
+        }));
+
+        var allAxis = (data[0].map(function (i, j) {
+            return i.axis
+        })),
+            total = allAxis.length,
+            radius = Math.min(cfg.w / 2, cfg.h / 2),
+            Format = d3.format('%'),
+            angleSlice = Math.PI * 2 / total;
+
+            var rScale = d3.scaleLinear() // Use d3.scaleLinear() instead of d3.scale.linear()
+    .range([0, radius])
+    .domain([0, maxValue]);
+
+        d3.select(id).select("svg").remove();
+
+        var svg = d3.select(id).append("svg")
+            .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
+            .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
+            .attr("class", "radar" + id);
+
+        var g = svg.append("g")
+            .attr("transform", "translate(" + (cfg.w / 2 + cfg.margin.left) + "," + (cfg.h / 2 + cfg.margin.top) + ")");
+
+        var filter = g.append('defs').append('filter').attr('id', 'glow'),
+            feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
+            feMerge = filter.append('feMerge'),
+            feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
+            feMergeNode_2 = feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+        var axisGrid = g.append("g").attr("class", "axisWrapper");
+
+        axisGrid.selectAll(".levels")
+            .data(d3.range(1, (cfg.levels + 1)).reverse())
+            .enter()
+            .append("circle")
+            .attr("class", "gridCircle")
+            .attr("r", function (d, i) {
+                return radius / cfg.levels * d;
+            })
+            .style("fill", "#CDCDCD")
+            .style("stroke", "#CDCDCD")
+            .style("fill-opacity", cfg.opacityCircles)
+            .style("filter", "url(#glow)");
+
+        axisGrid.selectAll(".axisLabel")
+            .data(d3.range(1, (cfg.levels + 1)).reverse())
+            .enter().append("text")
+            .attr("class", "axisLabel")
+            .attr("x", 4)
+            .attr("y", function (d) {
+                return -d * radius / cfg.levels;
+            })
+            .attr("dy", "0.4em")
+            .style("font-size", "10px")
+            .style("font-family", "Times New Roman, Times, serif")
+            .attr("fill", "Blue")
+            .text(function (d, i) {
+                return Format(maxValue * d / cfg.levels);
+            });
+
+        var axis = axisGrid.selectAll(".axis")
+            .data(allAxis)
+            .enter()
+            .append("g")
+            .attr("class", "axis");
+
+            axis.append("line")
+    .attr("x1", 0)
+    .attr("y1", 0)
+    .attr("x2", function (d, i) {
+        return rScale(maxValue * 1.1) * Math.cos(angleSlice * i - Math.PI / 2);
+    })
+    .attr("y2", function (d, i) {
+        return rScale(maxValue * 1.1) * Math.sin(angleSlice * i - Math.PI / 2);
+    })
+    .attr("class", "line")
+    .style("stroke", "white")
+    .style("stroke-width", "2px");
+
+axis.append("text")
+    .attr("class", "legend")
+    .style("font-size", "11px")
+    .attr("text-anchor", function(d, i) {
+        // Adjust text-anchor based on the position of the axis label
+        if (i === 0 || i === total / 2) {
+            return "middle";
+        } else if (i < total / 2) {
+            return "start";
+        } else {
+            return "end";
+        }
+    })
+    .attr("dy", function(d, i) {
+        // Adjust dy based on the position of the axis label
+        if (i === 0 || i === total / 2) {
+            return "0.35em";
+        } else if (i < total / 2) {
+            return "1em";
+        } else {
+            return "-0.5em";
+        }
+    })
+    .attr("x", function (d, i) {
+        return rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice * i - Math.PI / 2);
+    })
+    .attr("y", function (d, i) {
+        return rScale(maxValue * cfg.labelFactor) * Math.sin(angleSlice * i - Math.PI / 2);
+    })
+    .text(function (d) {
+        return d
+    })
+    .style("fill", "white");
+            var radarLine = d3.lineRadial()
+    .curve(d3.curveLinearClosed) // Use d3.curveLinearClosed for interpolation
+    .radius(function (d) {
+        return rScale(d.value);
+    })
+    .angle(function (d, i) {
+        return i * angleSlice;
+    });
+
+
+
+    if (cfg.roundStrokes) {
+    radarLine.curve(d3.curveCardinalClosed);
+        }
+        var selectedRadarIndices = [];
+        var blobWrapper = g.selectAll(".radarWrapper")
+    .data(data)
+    .enter().append("g")
+    .attr("class", "radarWrapper");
+
+blobWrapper.append("path")
+    .attr("class", "radarArea")
+    .attr("d", function (d, i) {
+        return radarLine(d);
+    })
+    .style("fill", function (d, i) {
+        return cfg.color(i);
+    })
+    .style("fill-opacity", cfg.opacityArea)
+    .each(function (d, i) {
+        // Set a custom attribute 'data-index' with the index value
+        d3.select(this).attr('data-index', i);
+    })
+    .on("click", function () {
+        var clickedIndex = +d3.select(this).attr('data-index');
+
+        // Check if the clicked index is already in the selected indices array
+        var selectedIndex = selectedRadarIndices.indexOf(clickedIndex);
+        if (selectedIndex !== -1) {
+            // If the index is already selected, remove it
+            selectedRadarIndices.splice(selectedIndex, 1);
+            d3.select(this).classed("selected", false); // Remove visual indication
+            d3.select(this).transition().duration(500).attr("transform", ""); // Reset size with transition
+            // Reset size of border and points
+            d3.select("#radarBorder_" + clickedIndex).transition().duration(500).attr("transform", "");
+            d3.selectAll(".dot_" + clickedIndex).transition().duration(500).attr("transform", "");
+        } else {
+            // If the index is not selected, add it
+            if (selectedRadarIndices.length === 2) {
+                // If the array already has 2 elements, empty it before adding the new one
+                selectedRadarIndices = [];
+                // Reset visual indication and size of all radar areas, borders, and points
+                blobWrapper.selectAll(".radarArea")
+                    .classed("selected", false)
+                    .attr("transform", "");
+                radarBorder.selectAll(".radarBorder")
+                    .attr("transform", "");
+                svg.selectAll(".dot")
+                    .attr("transform", "");
+            }
+            selectedRadarIndices.push(clickedIndex);
+            d3.select(this).classed("selected", true); // Add visual indication
+            d3.select(this).transition().duration(500).attr("transform", "scale(1.2)"); // Increase size with transition
+            // Increase size of border and points
+            d3.select("#radarBorder_" + clickedIndex).transition().duration(500).attr("transform", "scale(1.2)");
+            d3.selectAll(".dot_" + clickedIndex).transition().duration(500).attr("transform", "scale(1.2)");
+        }
+
+        console.log("Selected radar indices:", selectedRadarIndices);
+    })
+    .on("mouseover", function (event) {
+        var index = d3.select(this).attr('data-index');
+        var xPos = event.clientX + 10; // Adjusted x position
+        var yPos = event.clientY - 10; // Adjusted y position
+        d3.select("#tooltipBox")
+            .style("left", xPos + "px")
+            .style("top", yPos + "px")
+            .style("display", "block")
+            .text(columnNames[index]) // Show corresponding column name
+            .style("fill", "black")
+            .style("background-color", "green");  // Set hover box text color to black
+    })
+    .on("mouseout", function () {
+        d3.select("#tooltipBox").style("display", "none"); // Hide tooltip on mouseout
+    });
+
+blobWrapper.append("path")
+    .attr("class", "radarStroke")
+    .attr("d", function (d, i) {
+        return radarLine(d);
+    })
+    .style("stroke-width", cfg.strokeWidth + "px")
+    .style("stroke", function (d, i) {
+        return cfg.color(i);
+    })
+    .style("fill", "none");
+
+blobWrapper.selectAll(".radarCircle")
+    .data(function (d, i) {
+        return d;
+    })
+    .enter().append("circle")
+    .attr("class", "radarCircle")
+    .attr("r", cfg.dotRadius)
+    .attr("cx", function (d, i) {
+        return rScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2);
+    })
+    .attr("cy", function (d, i) {
+        return rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2);
+    })
+    .style("fill", function (d, i, j) {
+        return cfg.color(j);
+    });
+
+var blobCircleWrapper = g.selectAll(".radarCircleWrapper")
+    .data(data)
+    .enter().append("g")
+    .attr("class", "radarCircleWrapper");
+
+blobCircleWrapper.selectAll(".radarInvisibleCircle")
+    .data(function (d, i) {
+        return d;
+    })
+    .enter().append("circle")
+    .attr("class", "radarInvisibleCircle")
+    .attr("r", cfg.dotRadius * 1.5)
+    .attr("cx", function (d, i) {
+        return rScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2);
+    })
+    .attr("cy", function (d, i) {
+        return rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2);
+    })
+    .style("fill", "none")
+    .style("pointer-events", "all");
+
+
+        var tooltip = g.append("text")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        function wrap(text, width) {
+            text.each(function () {
+                var text = d3.select(this),
+                    words = text.text().split(/\s+/).reverse(),
+                    word,
+                    line = [],
+                    lineNumber = 0,
+                    lineHeight = 1.4,
+                    y = text.attr("y"),
+                    x = text.attr("x"),
+                    dy = parseFloat(text.attr("dy")),
+                    tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+
+                while (word = words.pop()) {
+                    line.push(word);
+                    tspan.text(line.join(" "));
+                    if (tspan.node().getComputedTextLength() > width) {
+                        line.pop();
+                        tspan.text(line.join(" "));
+                        line = [word];
+                        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                    }
+                }
+            });
+        }
+        svg.append("text")
+        .attr("x", width / 2 + 20)
+        .attr("y", margin.top / 2 -15)
+        .attr("text-anchor", "middle")
+        .style("font-size", "18px")
+        .style("fill", "White")
+        .style("font-family","Times New Roman, Times, serif")
+        .style("font-weight", "bold") 
+        .text("Radar Plot to cluster numerical features");
+    }
+
+    let column_name;
+        fetch('/correlation_data')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                let globalData_radar = data;
+                correlationDistances = globalData_radar.correlation_distances.slice(0, 3);
+                column_name = globalData_radar.column_names.slice(0, 3);
+                RadarChart(".radarChart", correlationDistances, column_name, radarChartOptions);
+            })
+            .catch(error => console.error('Error fetching correlation data:', error));
+
+//#############################################################################################################################
+//#############################################################################################################################
+//######################################################Chord Diagram##########################################################
+//#############################################################################################################################
+//#############################################################################################################################
+function groupTicks(d, step) {
+  const k = (d.endAngle - d.startAngle) / d.value;
+  return d3.range(0, d.value, step).map(value => {
+    return {value: value, angle: value * k + d.startAngle};
+  });
+}
+
+function plotChordDiagram(data) {
+    const width = 500;
+    const height = 600;
+    const { names, colors, values } = data;
+    const flatData = [].concat(...values);
+
+    const outerRadius = Math.min(width, height) * 0.5 - 60;
+    const innerRadius = outerRadius - 10;
+    const tickStep = d3.tickStep(0, d3.sum(flatData), 100);
+    const formatValue = d3.format(".0%");
+
+    const chord = d3.chord()
+        .padAngle(10 / innerRadius)
+        .sortSubgroups(d3.descending)
+        .sortChords(d3.descending);
+
+    const arc = d3.arc()
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius);
+
+    const ribbon = d3.ribbon()
+        .radius(innerRadius - 1)
+        .padAngle(1 / innerRadius);
+
+    const color = d3.scaleOrdinal(names, colors);
+
+    // Select the container by its ID and append the SVG element
+    const svg = d3.select("#chord")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width / 2 + 25}, ${height / 2 + 25})`); // Translate to the center of the SVG
+
+    const chords = chord(values);
+
+    const group = svg.append("g")
+        .selectAll()
+        .data(chords.groups)
+        .join("g");
+    group.append("path")
+        .attr("fill", d => color(names[d.index]))
+        .attr("d", arc)
+        .on("click", function (event, d) {
+            const clicked_chordname = names[d.index]; // Save the name of the clicked chord
+            console.log("Clicked Chord:", clicked_chordname);
+            // Now you can use clicked_chordname as needed
+            fetch('/piechart_data')
+    .then(response => response.json())
+    .then(data => {
+        console.log("Received data from backend:", data);
+        globalData_pie = data;
+
+        // Access the value associated with the key "Course"
+        const courseData = data[clicked_chordname];
+        console.log("Data associated with the key 'Course':", courseData);
+        console.log(globalData_pie);
+
+        // Check if the courseData exists before proceeding
+        if (courseData) {
+            createInteractivePieChart(courseData);
+        } else {
+            console.error("No data found with the key 'Course'");
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching data:', error);
+    });
+
+        });
+
+    group.append("title")
+        .text(d => `${names[d.index]}\n${formatValue(d.value / d3.sum(chords.groups, g => g.value))}`);
+
+    const groupTick = group.append("g")
+        .selectAll()
+        .data(d => groupTicks(d, tickStep))
+        .join("g")
+        .attr("transform", d => `rotate(${d.angle * 180 / Math.PI - 90}) translate(${outerRadius},0)`);
+
+    groupTick.append("line")
+        .attr("stroke", "currentColor")
+        .attr("x2", 6);
+
+    groupTick.append("text")
+        .attr("x", 8)
+        .attr("dy", "0.35em")
+        .style("font-size", "12px")
+        .style("fill", "white")
+        .style("font-family", "Arial, sans-serif")
+        .attr("transform", d => d.angle > Math.PI ? "rotate(180) translate(-16)" : null)
+        .attr("text-anchor", d => d.angle > Math.PI ? "end" : null)
+        .text(d => formatValue(d.value));
+
+    group.select("text")
+        .attr("font-weight", "bold")
+        .text(function (d) {
+            return this.getAttribute("text-anchor") === "end"
+                ? `↑ ${names[d.index]}`
+                : `${names[d.index]} ↓`;
+        });
+
+    svg.append("g")
+        .attr("fill-opacity", 0.8)
+        .selectAll("path")
+        .data(chords)
+        .join("path")
+        .style("mix-blend-mode", "multiply")
+        .attr("fill", d => color(names[d.source.index]))
+        .attr("d", ribbon)
+        .append("title")
+        .text(d => "${formatValue(d.source.value)} ${names[d.target.index]} → ${names[d.source.index]}${d.source.index === d.target.index ? '' : `\n${formatValue(d.target.value)} ${names[d.source.index]} → ${names[d.target.index]}}");
+}
+
+// Define your data
+//const data = {
+  //values: [
+    //[.096899, .008859, .000554, .004430, .025471, .024363, .005537, .025471],
+    //[.001107, .018272, .000000, .004983, .011074, .010520, .002215, .004983],
+    //[.000554, .002769, .002215, .002215, .003876, .008306, .000554, .003322],
+    //[.000554, .001107, .000554, .012182, .011628, .006645, .004983, .010520],
+    //[.002215, .004430, .000000, .002769, .104097, .012182, .004983, .028239],
+    //[.011628, .026024, .000000, .013843, .087486, .168328, .017165, .055925],
+    //[.000554, .004983, .000000, .003322, .004430, .008859, .017719, .004430],
+    //[.002215, .007198, .000000, .003322, .016611, .014950, .001107, .054264]
+  //],
+  //names: ["Apple", "HTC", "Huawei", "LG", "Nokia", "Samsung", "Sony", "Other"],
+  //colors: ["#c4c4c4", "#69b40f", "#ec1d25", "#c8125c", "#008fc8", "#10218b", "#134b24", "#737373"]
+//};
+fetch('/chord-data')
+                .then(response => response.json())
+                .then(data => {
+                    // Call the plotChordDiagram function with fetched data
+                    //plotChordDiagram(data);
+                    //console.log(data),
+                    //plotChordDiagram(data);
+                    //document.getElementById('chord').appendChild(plotChordDiagram(data));
+                    plotChordDiagram(data);
+
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+
+            
+//#############################################################################################################################
+//#############################################################################################################################
+//######################################################MDS Plot###############################################################
+//#############################################################################################################################
+//#############################################################################################################################
+
+const columnNames = [ 'Application order', 'Age at enrollment', 'Unemployment rate',
+       'Inflation rate', 'GDP', 'Units 1st sem credit', 'Units 1st sem enroll',
+       'Units 1st sem approved', 'Units 1st sem grade', 'Units 1st sem eval',
+       'Units 1st sem without eval'];
+
+const indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
+let globalData_mds;
+
+fetch('/mds_result')
+    .then(response => response.json())
+    .then(data => {
+        globalData_mds = data;
+        console.log('Data MDS:', data.data_mds);
+        console.log('Features MDS:', data.features_mds);
+        console.log('Cluster Labels:', data.cluster_labels);
+        console.log('Correlation Matrix:', data.correlation_matrix);
+        //drawScatterplot("dataPlot", data.data_mds);
+        //drawClusteredScatterplot("clusteredDataPlot", data.data_mds, data.cluster_labels);
+        drawScatterplot("featuresPlot", data.features_mds, data.correlation_matrix);
+    })
+    .catch(error => console.error('Error fetching MDS results:', error));
+
+// Global variable to store the indices of selected points
+var selectedPoints = [];
+// Function to draw scatterplot
+
+
+function drawScatterplot(svgId, data, corrMatrix) {
+    const container = document.querySelector('.box4');
+    const containerWidth = container.clientWidth; // Get the width of the container
+    const containerHeight = container.clientHeight; // Get the height of the container
+
+    const margin = { top: 30, right: 90, bottom: 45, left: 50 };
+    const width = containerWidth - margin.left - margin.right;
+    const height = containerHeight - margin.top - margin.bottom + 50;
+
+    const svg = d3.select(`#${svgId}`)
+        .attr("width", containerWidth)
+        .attr("height", containerHeight);
+
+    const xScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => d[0])).nice()
+        .range([margin.left, width - margin.right]);
+
+    const yScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => d[1])).nice()
+        .range([height - margin.bottom, margin.top]);
+
+    // Add X axis with transition
+    svg.append("g")
+        .attr("transform", `translate(0, ${height - margin.bottom})`)
+        .transition()
+        .duration(1000)
+        .call(d3.axisBottom(xScale));
+
+    // Add X axis label
+    svg.append("text")
+        .attr("transform", `translate(${width / 2}, ${height})`)
+        .style("text-anchor", "middle")
+        .text("MDS 1")
+        .style("fill", "white");
+
+    // Add Y axis with transition
+    svg.append("g")
+        .attr("transform", `translate(${margin.left}, 0)`)
+        .transition()
+        .duration(1000)
+        .call(d3.axisLeft(yScale));
+
+    // Add Y axis label
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", margin.left / 2 - 10)
+        .attr("x", 30 - (height / 2))
+        .style("text-anchor", "middle")
+        .text("MDS 2")
+        .style("fill", "white");
+
+    // Add dots with transition
+    svg.selectAll(".dot")
+        .data(data)
+        .enter().append("circle")
+        .attr("class", "dot")
+        .attr("cx", d => xScale(d[0]))
+        .attr("cy", d => yScale(d[1]))
+        .attr("r", 10)
+        .style("fill", "#4caf50")
+        .style("cursor", "pointer")
+        .transition()
+        .duration(1000);
+
+    // Add click event to dots
+    svg.selectAll(".dot")
+        .on("click", function (event, d) {
+            // Toggle selection
+            var i = selectedPoints.indexOf(data.indexOf(d));
+            if (i === -1) {
+                selectedPoints.push(data.indexOf(d));
+                d3.select(this).style("stroke", "#000000").style("stroke-width", "2px");
+            } else {
+                selectedPoints.splice(i, 1);
+                d3.select(this).style("stroke", null).style("stroke-width", null);
+            }
+            console.log("Selected points:", selectedPoints);
+            // Fetch and process selected data
+            fetch('/correlation_data')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    let globalData_radar = data;
+                    const selectedData = selectedPoints.map(index => ({
+                        correlationDistance: globalData_radar.correlation_distances[index],
+                        columnName: globalData_radar.column_names[index]
+                    }));
+
+                    const correlationDistances = selectedData.map(data => data.correlationDistance);
+                    const columnNames = selectedData.map(data => data.columnName);
+
+                    RadarChart(".radarChart", correlationDistances, columnNames, radarChartOptions);
+                })
+                .catch(error => console.error('Error fetching correlation data:', error));
+        });
+
+    // Draw correlation lines with transition
+    for (let i = 0; i < corrMatrix.length; i++) {
+        for (let j = i + 1; j < corrMatrix[i].length; j++) {
+            if ((corrMatrix[i][j]) >= 0.5) {
+                svg.append("line")
+                    .attr("x1", xScale(data[i][0]))
+                    .attr("y1", yScale(data[i][1]))
+                    .attr("x2", xScale(data[j][0]))
+                    .attr("y2", yScale(data[j][1]))
+                    .attr("stroke-width", 0.8)
+                    .attr("stroke", "#ff9800")
+                    .transition()
+                    .duration(1000);
+            }
+            if ((corrMatrix[i][j]) < -0.07) {
+                svg.append("line")
+                    .attr("x1", xScale(data[i][0]))
+                    .attr("y1", yScale(data[i][1]))
+                    .attr("x2", xScale(data[j][0]))
+                    .attr("y2", yScale(data[j][1]))
+                    .attr("stroke-width", 0.8)
+                    .attr("stroke", "#2196f3")
+                    .transition()
+                    .duration(1000);
+            }
+        }
+    }
+
+// Add text to the dots
+svg.selectAll(".text")
+    .data(data)
+    .enter().append("text")
+    .attr("x", d => xScale(d[0]))
+    .attr("y", d => yScale(d[1]) + 5)  // Adjust y position to center text
+    .text((d, i) => i + 1)  // Display the index of the variable
+    .attr("font-size", "10px")
+    .attr("text-anchor", "middle")  // Center the text
+    .attr("fill", "black")
+    .style("pointer-events", "none")  // Make text non-interactive
+    .style("user-select", "none");  // Make text non-selectable
+
+ // Add plot title
+ svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", margin.top / 2)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("fill", "White")
+        .style("font-family","Times New Roman, Times, serif")
+        .style("font-weight", "bold") 
+        .text("MDS plot to identify potential corrleations");
+
+            // Define the legend
+    const legend = svg.selectAll(".legend")
+        .data(columnNames)
+        .enter().append("g")
+        .attr("class", "legend")
+        .style("fill", "White")
+        .attr("transform", (d, i) => `translate(-45,${i * 10})`);
+
+    // Add text to the legend
+    legend.append("text")
+        .attr("x", width)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "start")
+        .style("font-size", "12px")
+        .style("fill", "white")
+        .text((d, i) => `${indices[i] + 1}: ${d}`);
+
+        // Define the colors and their labels
+const colors = ["#ff9800", "#2196f3"];  // Replace with your colors
+const labels_legend = ["Strong Postive Corr", "Strong Negative Corr"];  // Replace with your labels
+
+// Add the color legend below the existing legend
+const colorLegend = svg.selectAll(".colorLegend")
+    .data(colors)
+    .enter().append("g")
+    .attr("class", "colorLegend")
+    .attr("transform", (d, i) => `translate(100,${(columnNames.length + i) * 20 - 100})`);  // Adjust the position as needed
+
+// Add colored rectangles to the color legend
+colorLegend.append("rect")
+    .attr("x", width - 35)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", d => d);
+
+// Add text to the color legend
+colorLegend.append("text")
+    .attr("x", width - 45)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .style("font-size", "12px")
+    .style("fill", "White")
+    .text((d, i) => labels_legend[i]);
+
+        
+
+}
+
+//#############################################################################################################################
+//#############################################################################################################################
+//######################################################Scatter Plot###########################################################
+//#############################################################################################################################
+//#############################################################################################################################
+function plotScatterplot(xIndex, yIndex) {
+    // Clear existing SVG content
+    d3.select("#chart").selectAll("svg").remove();
+
+    d3.csv("num_data.csv").then(function(data) {
+        console.log("ScatterPlot 1  ", data);
+        const margin = { top: 50, right: 80, bottom: 50, left: 40 };
+        const width = 500 - margin.left - margin.right;
+        const height = 200 - margin.top - margin.bottom;
+
+        // Extract the data points for the selected columns
+        const xData = data.map(d => parseFloat(d[data.columns[xIndex]]));
+        const yData = data.map(d => parseFloat(d[data.columns[yIndex]]));
+
+        // Filter data points greater than (0, 0)
+        const filteredData = data.filter((d, i) => xData[i] > 0 && yData[i] > 0);
+
+        // Calculate the maximum values for the scales
+        const xMax = d3.max(xData);
+        const yMax = d3.max(yData);
+
+        // Find unique cluster labels
+        const uniqueLabels = Array.from(new Set(data.map(d => d.cluster_label)));
+
+        // Color scale for cluster labels
+        const colorScale = d3.scaleOrdinal()
+            .domain(uniqueLabels)
+            .range(d3.schemeCategory10);
+
+        // Append SVG
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Scales
+        const xScale = d3.scaleLinear()
+            .domain([0, xMax])
+            .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, yMax])
+            .range([height, 0]);
+
+        // Draw scatterplot with transition
+        svg.selectAll("circle")
+            .data(filteredData)
+            .enter()
+            .append("circle")
+            .attr("cx", d => xScale(parseFloat(d[data.columns[xIndex]])))
+            .attr("cy", d => yScale(parseFloat(d[data.columns[yIndex]])))
+            .attr("r", 5)
+            .attr("fill", d => colorScale(d.cluster_label))
+            .transition()
+            .duration(500) // Transition duration in milliseconds
+            .ease(d3.easeLinear); // Linear easing for smooth transition
+
+// Add x-axis with transition
+svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale))
+            .append("text")
+            .attr("x", width / 2)
+            .attr("y", margin.bottom - 20)
+            .attr("fill", "#fff")
+            .attr("text-anchor", "middle")
+            .text(data.columns[xIndex]);
+
+        // Add y-axis with transition
+        svg.append("g")
+            .call(d3.axisLeft(yScale))
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height / 2)
+            .attr("y", -margin.left + 10)
+            .attr("fill", "#fff")
+            .attr("text-anchor", "middle")
+            .text(data.columns[yIndex]);
+
+        // Plot title with transition
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", -margin.top / 2)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("font-weight", "bold")
+            .style("fill", "#fff") // Set text color to white
+            .style("font-family", "Times New Roman, Times, serif") // Set font family to Times New Roman
+            .text(`${data.columns[xIndex]} vs ${data.columns[yIndex]}`);
+
+        // Counts display
+        const countsDisplay = svg.append("g")
+    .attr("class", "counts")
+    .attr("transform", "translate(10, 10)"); // Adjust position as needed
+
+// Initialize counts
+const counts = {
+    "Dropout": 0,
+    "Enrolled": 0,
+    "Graduate": 0
+};
+
+// Update counts display
+countsDisplay.selectAll("text")
+    .data(Object.keys(counts))
+    .enter()
+    .append("text")
+    .attr("x", width - margin.right+85)
+    .attr("y", (d, i) => margin.top + i * 20 +30) // Adjust the position based on the index
+    .style("fill", "#fff") // Set text color to white
+    .style("font-family", "Times New Roman, Times, serif") // Set font family to Times New Roman
+    .text(d => `${d}: ${counts[d]}`)
+    .style("font-size", "10px");
+        // Brush for selection
+        const brush = d3.brush()
+            .extent([[0, 0], [width, height]])
+            .on("end", brushed);
+
+        svg.append("g")
+            .attr("class", "brush")
+            .call(brush);
+
+        function brushed(event) {
+            if (!event.selection) return;
+
+            const [[x0, y0], [x1, y1]] = event.selection;
+            const selectedData = filteredData.filter(d =>
+                xScale(parseFloat(d[data.columns[xIndex]])) >= x0 &&
+                xScale(parseFloat(d[data.columns[xIndex]])) <= x1 &&
+                yScale(parseFloat(d[data.columns[yIndex]])) >= y0 &&
+                yScale(parseFloat(d[data.columns[yIndex]])) <= y1
+            );
+
+            // Reset counts
+            Object.keys(counts).forEach(key => counts[key] = 0);
+
+            // Update counts
+            selectedData.forEach(d => {
+                counts[d.Target]++;
+            });
+
+            // Update counts display
+            countsDisplay.selectAll("text")
+                .data(Object.keys(counts))
+                .text(d => `${d}: ${counts[d]}`);
+        }
+    });
+}
+
+
+
+
+
+// Call the function with the column indices
+plotScatterplot(0, 1); // Assuming the first two columns are used for plotting
+
+
+d3.csv("num_data.csv").then(function(data) {
+    // Populate the dropdown menus with options
+    const columns = Object.keys(data[0]);
+    const xSelect = d3.select("#xColumn");
+    const ySelect = d3.select("#yColumn");
+
+    columns.forEach(column => {
+        xSelect.append("option").text(column);
+        ySelect.append("option").text(column);
+    });
+
+    // Define a function to update the scatterplot based on selected columns
+    function updateScatterplot() {
+        const xIndex = columns.indexOf(xSelect.node().value);
+        const yIndex = columns.indexOf(ySelect.node().value);
+        plotScatterplot(xIndex, yIndex);
+    }
+
+    // Initial plot
+    updateScatterplot();
+
+    // Handle selection change event
+    xSelect.on("change", updateScatterplot);
+    ySelect.on("change", updateScatterplot);
+});
+
+    </script>
+            </script>
+        </div>
+    </div>
+</body>
+</html>
